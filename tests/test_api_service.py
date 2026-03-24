@@ -86,3 +86,14 @@ def test_should_return_expected_cep_data_structure(mock_get):
     assert "logradouro" in result
     assert isinstance(result["cep"], str)
     assert isinstance(result["logradouro"], str)
+
+
+@patch("app.services.api_service.requests.get")
+def test_should_raise_error_when_response_data_is_invalid(mock_get):
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {"cep": "03535-000"}
+    mock_get.return_value = mock_response
+
+    with pytest.raises(CepServiceError, match="Resposta inválida ao buscar CEP"):
+        get_cep("03535000")
