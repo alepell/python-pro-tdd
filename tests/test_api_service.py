@@ -68,3 +68,21 @@ def test_should_not_call_requests_when_cep_is_invalid(mock_get):
         get_cep("abc12345")
 
     mock_get.assert_not_called()
+
+
+@patch("app.services.api_service.requests.get")
+def test_should_return_expected_cep_data_structure(mock_get):
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = {
+        "cep": "03535-000",
+        "logradouro": "Av Dr Bernardino Brito Fonseca De Carvalho",
+    }
+    mock_get.return_value = mock_response
+
+    result = get_cep("03535000")
+
+    assert "cep" in result
+    assert "logradouro" in result
+    assert isinstance(result["cep"], str)
+    assert isinstance(result["logradouro"], str)

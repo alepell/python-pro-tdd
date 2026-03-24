@@ -1,14 +1,18 @@
+from urllib import response
+
 import requests
 from app.core.config import settings
 from app.exceptions.cep_service_error import CepServiceError
 from typing import Any
+
+from app.schemas.cep_data import CepData
 
 
 def build_cep_url(cep: str) -> str:
     return f"{settings.VIA_CEP_BASE_URL}/{cep}/json/"
 
 
-def get_cep(cep: str) -> dict[str, Any]:
+def get_cep(cep: str) -> CepData:
     validate_cep(cep)
 
     url = build_cep_url(cep)
@@ -20,8 +24,11 @@ def get_cep(cep: str) -> dict[str, Any]:
 
     if response.status_code != 200:
         raise CepServiceError("Erro ao buscar CEP")
-
-    return response.json()
+    data = response.json()
+    return {
+        "cep": data["cep"],
+        "logradouro": data["logradouro"],
+    }
 
 
 def validate_cep(cep: str) -> None:
