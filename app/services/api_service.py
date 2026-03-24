@@ -25,14 +25,22 @@ def get_cep(cep: str) -> CepData:
     if response.status_code != 200:
         raise CepServiceError("Erro ao buscar CEP")
     data = response.json()
-    if "cep" not in data or "logradouro" not in data:
-        raise CepServiceError("Resposta inválida ao buscar CEP")
-    return {
-        "cep": data["cep"],
-        "logradouro": data["logradouro"],
-    }
+    return parse_cep_response(data)
 
 
 def validate_cep(cep: str) -> None:
     if not cep.isdigit() or len(cep) != 8:
         raise CepServiceError("CEP inválido")
+
+
+def parse_cep_response(data: Any) -> CepData:
+    if not isinstance(data, dict):
+        raise CepServiceError("Resposta inválida ao buscar CEP")
+
+    if "cep" not in data or "logradouro" not in data:
+        raise CepServiceError("Resposta inválida ao buscar CEP")
+
+    return {
+        "cep": data["cep"],
+        "logradouro": data["logradouro"],
+    }
