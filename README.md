@@ -144,8 +144,8 @@ print(result)
 ## 🚀 Próximos passos (em evolução)
 
 - [ ] Implementar FastAPI
-- [ ] Adicionar tipagem com Pydantic
-- [ ] Logging estruturado
+- [x] Adicionar tipagem com Pydantic/TypeDict
+- [x] Logging estruturado
 - [ ] Dockerização
 - [ ] CI/CD com GitHub Actions
 
