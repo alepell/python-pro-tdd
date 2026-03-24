@@ -1,0 +1,2 @@
+class CepServiceError(Exception):
+    pass
