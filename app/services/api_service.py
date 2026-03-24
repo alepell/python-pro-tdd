@@ -1,11 +1,12 @@
-from urllib import response
-
 import requests
+import logging
 from app.core.config import settings
 from app.exceptions.cep_service_error import CepServiceError
 from typing import Any
 
 from app.schemas.cep_data import CepData
+
+logger = logging.getLogger(__name__)
 
 
 def build_cep_url(cep: str) -> str:
@@ -20,6 +21,7 @@ def get_cep(cep: str) -> CepData:
     try:
         response = requests.get(url, timeout=5)
     except requests.exceptions.Timeout as exc:
+        logger.error("Timeout ao buscar CEP")
         raise CepServiceError("Timeout ao buscar CEP") from exc
 
     if response.status_code != 200:

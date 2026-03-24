@@ -97,3 +97,14 @@ def test_should_raise_error_when_response_data_is_invalid(mock_get):
 
     with pytest.raises(CepServiceError, match="Resposta inválida ao buscar CEP"):
         get_cep("03535000")
+
+
+@patch("app.services.api_service.logger.error")
+@patch("app.services.api_service.requests.get")
+def test_should_log_error_when_request_times_out(mock_get, mock_logger_error):
+    mock_get.side_effect = requests.exceptions.Timeout()
+
+    with pytest.raises(CepServiceError, match="Timeout ao buscar CEP"):
+        get_cep("03535000")
+
+    mock_logger_error.assert_called_once()
