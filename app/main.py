@@ -1,6 +1,5 @@
-def main():
-    print("Hello from python-backend!")
+from fastapi import FastAPI
+from app.api.routes.cep import router as cep_router
 
-
-if __name__ == "__main__":
-    main()
+app = FastAPI()
+app.include_router(cep_router)
