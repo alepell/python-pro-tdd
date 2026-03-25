@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 
 from app.exceptions.cep_service_error import CepServiceError
-from app.services.api_service import build_cep_url, get_cep
+from app.services.api_service import build_cep_url, get_cep, parse_cep_response
 
 
 def test_should_build_cep_url_correctly():
@@ -107,4 +107,25 @@ def test_should_log_error_when_request_times_out(mock_get, mock_logger_error):
     with pytest.raises(CepServiceError, match="Timeout ao buscar CEP"):
         get_cep("03535000")
 
-    mock_logger_error.assert_called_once()
+    mock_logger_error.assert_called_once_with("Timeout ao buscar CEP")
+
+
+@patch("app.services.api_service.logger.error")
+@patch("app.services.api_service.requests.get")
+def test_should_log_error_when_status_is_not_200(mock_get, mock_logger_error):
+    mock_response = Mock()
+    mock_response.status_code = 500
+    mock_get.return_value = mock_response
+
+    with pytest.raises(CepServiceError, match="Erro ao buscar CEP"):
+        get_cep("03535000")
+
+    mock_logger_error.assert_called_once_with("Erro ao buscar CEP")
+
+
+@patch("app.services.api_service.logger.error")
+def test_should_log_error_when_response_data_is_invalid(mock_logger_error):
+    with pytest.raises(CepServiceError, match="Resposta inválida ao buscar CEP"):
+        parse_cep_response({"cep": "03535-000"})
+
+    mock_logger_error.assert_called_once_with("Resposta inválida ao buscar CEP")
