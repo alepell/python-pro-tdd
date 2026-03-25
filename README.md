@@ -143,7 +143,7 @@ print(result)
 
 ## 🚀 Próximos passos (em evolução)
 
-- [ ] Implementar FastAPI
+- [x] Implementar FastAPI
 - [x] Adicionar tipagem com Pydantic/TypeDict
 - [x] Logging estruturado
 - [ ] Dockerização
