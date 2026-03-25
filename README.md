@@ -1,171 +1,111 @@
-# 🐍 Python Backend — CEP Service (TDD + Clean Architecture)
+# Python Backend - CEP Service (FastAPI + TDD)
 
-Projeto desenvolvido com foco em **boas práticas de backend profissional**, utilizando **TDD (Test Driven Development)** desde o início.
+API para consulta de CEP usando ViaCEP, com validacao de entrada, tratamento de erros e testes automatizados.
 
-Este serviço implementa a consulta de CEP utilizando a API do ViaCEP, com tratamento de erros, validação de entrada e isolamento de dependências externas.
+## Objetivo
 
----
+Este projeto demonstra:
 
-## 🚀 Objetivo
+- desenvolvimento de API com FastAPI
+- arquitetura em camadas (rota, servico, excecoes, schema)
+- TDD com pytest
+- isolamento de chamadas externas com `unittest.mock`
 
-Demonstrar habilidades em:
-
-- Desenvolvimento backend com Python
-- Testes automatizados com TDD
-- Integração com APIs externas
-- Tratamento de erros e resiliência
-- Organização de código em camadas
-- Boas práticas utilizadas em ambientes corporativos
-
----
-
-## 🧱 Tecnologias e ferramentas
+## Stack
 
 - Python 3.12+
-- pytest (testes)
-- requests (HTTP client)
-- python-dotenv (.env)
-- unittest.mock (mock de dependências externas)
+- FastAPI
+- Uvicorn
+- Requests
+- Pytest
+- python-dotenv
 
----
+## Estrutura
 
-## 📁 Estrutura do projeto
-
-```
+```text
 app/
-├── core/
-│   └── config.py          # Configurações via .env
-├── exceptions/
-│   └── cep_service_error.py  # Exceções customizadas
-├── services/
-│   └── api_service.py     # Lógica principal de negócio
-
+  api/
+    handlers/cep_handler.py     # Handler global para CepServiceError
+    routes/cep.py               # Endpoint /cep/{cep}
+  core/config.py                # Config de ambiente
+  exceptions/cep_service_error.py
+  schemas/cep_data.py           # Tipagem do retorno
+  services/api_service.py       # Regras de negocio e integracao ViaCEP
+  main.py                       # App FastAPI
 tests/
-└── test_api_service.py    # Testes automatizados
+  test_api_service.py
+  test_cep_route.py
+  test_parse_cep_response.py
 ```
 
----
+## Configuracao
 
-## 🧠 Abordagem: TDD (Test Driven Development)
+1. Copie o arquivo de exemplo:
 
-O projeto foi desenvolvido seguindo o ciclo:
-
-1. Escrever o teste (falhando)
-2. Implementar o mínimo para passar
-3. Refatorar com segurança
-
-### Exemplos de cenários testados:
-
-- ✅ Montagem correta da URL
-- ✅ Resposta de sucesso da API
-- ✅ Erro HTTP (status != 200)
-- ✅ Timeout da requisição
-- ✅ Validação de CEP inválido
-- ✅ Garantia de que a API não é chamada com input inválido
-
----
-
-## 🔐 Validação e Resiliência
-
-O serviço valida o CEP antes de qualquer chamada externa:
-
-- Apenas números
-- Exatamente 8 dígitos
-
-Isso evita chamadas desnecessárias e aumenta a robustez do sistema.
-
----
-
-## ⚠️ Tratamento de erros
-
-O projeto utiliza exceções customizadas:
-
-```python
-class CepServiceError(Exception):
-    pass
+```powershell
+Copy-Item .env.example .env
 ```
 
-Casos tratados:
+2. Defina no `.env`:
 
-- Timeout da API
-- Resposta inválida
-- CEP inválido
-
----
-
-## 🧪 Testes
-
-Para rodar os testes:
-
-```bash
-pytest
-```
-
-O projeto utiliza mocks para evitar dependência de API externa:
-
-```python
-@patch("app.services.api_service.requests.get")
-```
-
----
-
-## 🌍 Variáveis de ambiente
-
-Crie um arquivo `.env`:
-
-```
+```env
 VIA_CEP_BASE_URL=https://viacep.com.br/ws
 ```
 
----
+## Como rodar
 
-## 📌 Exemplo de uso
+Com ambiente virtual ativo:
 
-```python
-from app.services.api_service import get_cep
-
-result = get_cep("01001000")
-print(result)
+```bash
+uvicorn app.main:app --reload
 ```
 
----
+Documentacao interativa:
 
-## 💡 Diferenciais do projeto
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/redoc`
 
-- TDD aplicado desde o início
-- Mock de dependências externas (testes isolados)
-- Validação de entrada antes de integração
-- Exceções customizadas (evita uso de Exception genérica)
-- Código organizado em camadas
-- Pronto para evoluir para FastAPI
+## Endpoint
 
----
+### `GET /cep/{cep}`
 
-## 🚀 Próximos passos (em evolução)
+Exemplo:
 
-- [x] Implementar FastAPI
-- [x] Adicionar tipagem com Pydantic/TypeDict
-- [x] Logging estruturado
-- [ ] Dockerização
-- [ ] CI/CD com GitHub Actions
+```bash
+curl http://127.0.0.1:8000/cep/01001000
+```
 
----
+Resposta de sucesso (`200`):
 
-## 👨‍💻 Autor
+```json
+{
+  "cep": "01001-000",
+  "logradouro": "Praca da Se"
+}
+```
 
-Alexandre Pellegrino
-Fullstack Developer (React | Flutter | Python em evolução)
+Possiveis erros:
 
----
+- `400`: CEP invalido (nao numerico ou diferente de 8 digitos)
+- `504`: timeout ao consultar ViaCEP
+- `502`: falha geral de integracao (status nao 200 ou resposta invalida)
 
-## 🧠 Observação
+## Testes
 
-Este projeto faz parte de um roadmap focado em backend Python moderno, com ênfase em:
+Rodar todos os testes:
 
-- Integrações
-- Automação
-- Arquitetura limpa
-- APIs robustas
-- Engenharia de software aplicada
+```bash
+pytest -q
+```
 
----
+Rodar apenas testes da rota:
+
+```bash
+pytest tests/test_cep_route.py -q
+```
+
+## Notas de qualidade
+
+- validacao do CEP antes de chamar API externa
+- logs para erros de timeout, resposta invalida e falha de integracao
+- retorno padronizado de erro via handler global (`CepServiceError`)
