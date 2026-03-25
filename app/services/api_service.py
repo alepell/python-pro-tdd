@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import requests
 import logging
 from app.core.config import settings
@@ -42,15 +43,8 @@ def validate_cep(cep: str) -> None:
 
 
 def parse_cep_response(data: Any) -> CepData:
-    if not isinstance(data, dict):
+    try:
+        return CepData.model_validate(data)
+    except ValidationError:
         logger.error(INVALID_RESPONSE_MESSAGE)
         raise CepServiceError(INVALID_RESPONSE_MESSAGE)
-
-    if "cep" not in data or "logradouro" not in data:
-        logger.error(INVALID_RESPONSE_MESSAGE)
-        raise CepServiceError(INVALID_RESPONSE_MESSAGE)
-
-    return {
-        "cep": data["cep"],
-        "logradouro": data["logradouro"],
-    }

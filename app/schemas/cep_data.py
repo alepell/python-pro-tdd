@@ -1,6 +1,6 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
 
-class CepData(TypedDict):
+class CepData(BaseModel):
     cep: str
     logradouro: str

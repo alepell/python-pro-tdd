@@ -1,8 +1,8 @@
 import pytest
 import requests
+from pydantic import ValidationError
 from unittest.mock import Mock, patch
-
-
+from app.schemas.cep_data import CepData
 from app.exceptions.cep_service_error import CepServiceError
 from app.services.api_service import build_cep_url, get_cep, parse_cep_response
 
@@ -24,8 +24,8 @@ def test_should_return_json_when_api_respond_200(mock_get):
     }
     mock_get.return_value = mock_response
     result = get_cep("03535000")
-    assert result["cep"] == "03535-000"
-    assert result["logradouro"] == "Av Dr Bernardino Brito Fonseca De Carvalho"
+    assert result.cep == "03535-000"
+    assert result.logradouro == "Av Dr Bernardino Brito Fonseca De Carvalho"
 
 
 @patch("app.services.api_service.requests.get")
@@ -82,10 +82,10 @@ def test_should_return_expected_cep_data_structure(mock_get):
 
     result = get_cep("03535000")
 
-    assert "cep" in result
-    assert "logradouro" in result
-    assert isinstance(result["cep"], str)
-    assert isinstance(result["logradouro"], str)
+    assert hasattr(result, "cep")
+    assert hasattr(result, "logradouro")
+    assert isinstance(result.cep, str)
+    assert isinstance(result.logradouro, str)
 
 
 @patch("app.services.api_service.requests.get")
@@ -129,3 +129,17 @@ def test_should_log_error_when_response_data_is_invalid(mock_logger_error):
         parse_cep_response({"cep": "03535-000"})
 
     mock_logger_error.assert_called_once_with("Resposta inválida ao buscar CEP")
+
+
+def test_cep_data_should_be_a_pydantic_model():
+
+    data = CepData(cep="03535-000", logradouro="Rua Teste")
+    assert data.cep == "03535-000"
+    assert data.logradouro == "Rua Teste"
+
+
+def test_cep_data_should_raise_validation_error_when_fields_are_missing():
+    from app.schemas.cep_data import CepData
+
+    with pytest.raises(ValidationError):
+        CepData(cep="03535-000")  # logradouro ausente

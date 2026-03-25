@@ -1,6 +1,7 @@
 import pytest
 from app.services.api_service import parse_cep_response
 from app.exceptions.cep_service_error import CepServiceError
+from app.services.api_service import parse_cep_response
 
 
 def test_should_parse_valid_response():
@@ -8,8 +9,8 @@ def test_should_parse_valid_response():
 
     result = parse_cep_response(data)
 
-    assert result["cep"] == "03535-000"
-    assert result["logradouro"] == "Rua X"
+    assert result.cep == "03535-000"
+    assert result.logradouro == "Rua X"
 
 
 def test_should_raise_error_when_missing_fields():
@@ -24,3 +25,5 @@ def test_should_raise_error_when_data_is_not_dict():
 
     with pytest.raises(CepServiceError, match="Resposta inválida ao buscar CEP"):
         parse_cep_response(data)
+
+
