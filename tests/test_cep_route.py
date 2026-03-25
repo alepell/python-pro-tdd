@@ -41,3 +41,13 @@ def test_should_return_502_when_external_service_fails(mock_get_cep):
     response = client.get("/cep/03535000")
     assert response.status_code == 502
     assert response.json() == {"detail": "Erro ao buscar CEP"}
+
+
+@patch("app.api.routes.cep.get_cep")
+def test_should_use_global_handler_for_cep_service_error(mock_get_cep):
+    mock_get_cep.side_effect = CepServiceError("CEP inválido")
+
+    response = client.get("/cep/abc12345")
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "CEP inválido"}
